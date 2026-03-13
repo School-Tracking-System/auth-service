@@ -1,9 +1,194 @@
 basePath: /api/v1
+definitions:
+  github_com_fercho_school-tracking_services_auth_internal_core_domain.Role:
+    enum:
+    - admin
+    - driver
+    - guardian
+    - school_staff
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleDriver
+    - RoleGuardian
+    - RoleSchoolStaff
+  github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_core_domain.Role'
+        enum:
+        - admin
+        - driver
+        - guardian
+        - school_staff
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - role
+    type: object
+  github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.UserResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+    type: object
+  github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error:
+    properties:
+      code:
+        type: integer
+      details:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+      type:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: API documentation for the auth service of the School Tracking System.
   title: Auth Service API
   version: "1.0"
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT tokens
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error'
+      summary: Login user
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Use refresh token to get a new access token
+      parameters:
+      - description: Refresh Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error'
+      summary: Refresh JWT Token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email, password, and role
+      parameters:
+      - description: Register Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_dtos.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_fercho_school-tracking_services_auth_internal_infrastructure_api_errors.Error'
+      summary: Register a new user
+      tags:
+      - auth
 swagger: "2.0"

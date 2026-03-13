@@ -1,0 +1,11 @@
+with-expecter: true
+dir: "internal/core/ports/mocks"
+outpkg: "mocks"
+packages:
+  github.com/fercho/school-tracking/services/auth/internal/core/ports/repositories:
+    interfaces:
+      UserRepository:
+  github.com/fercho/school-tracking/services/auth/internal/core/ports/services:
+    interfaces:
+      AuthService:
+      JWTManager:
