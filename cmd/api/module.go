@@ -6,6 +6,7 @@ import (
 
 	"github.com/fercho/school-tracking/services/auth/internal/core/auth"
 	"github.com/fercho/school-tracking/services/auth/internal/infrastructure/api"
+	"github.com/fercho/school-tracking/services/auth/internal/infrastructure/grpc"
 	"github.com/fercho/school-tracking/services/auth/internal/infrastructure/persistence/postgres"
 	"github.com/fercho/school-tracking/services/auth/pkg/env"
 	"github.com/fercho/school-tracking/services/auth/pkg/logger"
@@ -23,6 +24,7 @@ func AppModule() fx.Option {
 		logger.Module,
 		auth.Module,
 		api.Module,
+		grpc.Module,
 		postgres.Module,
 		// Provide DB connection temporarily directly until a central DB pkg is made
 		fx.Provide(

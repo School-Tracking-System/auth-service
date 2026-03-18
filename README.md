@@ -17,12 +17,15 @@ services/auth/
 │   │   ├── domain/       # Modelos de dominio (User, Token, Claims)
 │   │   └── ports/        # Interfaces (AuthService, UserRepository, JWTManager)
 │   └── infrastructure/
-│       ├── api/          # Router chi, controllers, DTOs, errores HTTP
-│       └── persistence/  # Repositorio PostgreSQL con GORM
+│       ├── api/          # Adaptador HTTP REST: controllers, DTOs, errores, routes
+│       ├── persistence/  # Repositorio PostgreSQL con GORM
+│       └── messaging/    # Publisher NATS (pendiente)
 └── pkg/
     ├── env/              # Configuración por variables de entorno
     └── logger/           # Logger estructurado con Zap
 ```
+
+> **Convención de transporte:** Este servicio expone HTTP REST, por eso la carpeta de transporte se llama `infrastructure/api/`. Si en el futuro se expone gRPC, se añadirá `infrastructure/grpc/` en paralelo. Ver `docs/plans/backend/00-backend-overview.md §2`.
 
 ## Stack
 
@@ -112,6 +115,17 @@ Base path: `/api/v1/auth`
 
 Registra un nuevo usuario.
 
+**Validaciones:**
+
+| Campo | Obligatorio | Regla |
+|---|---|---|
+| `email` | Sí | Formato email válido |
+| `password` | Sí | Mínimo 6 caracteres |
+| `first_name` | Sí | — |
+| `last_name` | Sí | — |
+| `phone` | No | — |
+| `role` | Sí | `admin` \| `driver` \| `guardian` \| `school_staff` |
+
 **Request:**
 ```json
 {
@@ -152,6 +166,13 @@ Registra un nuevo usuario.
 ### POST /api/v1/auth/login
 
 Autentica un usuario y devuelve tokens JWT.
+
+**Validaciones:**
+
+| Campo | Obligatorio | Regla |
+|---|---|---|
+| `email` | Sí | Formato email válido |
+| `password` | Sí | — |
 
 **Request:**
 ```json
