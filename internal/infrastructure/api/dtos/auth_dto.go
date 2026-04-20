@@ -31,8 +31,13 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-// UserResponse represents the public user data returned in API responses.
-type UserResponse struct {
+// AuthResponse represents the complete payload returned after a successful login.
+type AuthResponse struct {
+	User   UserResponse  `json:"user"`
+	Tokens TokenResponse `json:"tokens"`
+}
+
+// UserResponse represents the public user data returned in API responses.type UserResponse struct {
 	ID        string  `json:"id"`
 	Email     string  `json:"email"`
 	FirstName string  `json:"first_name"`

@@ -62,21 +62,25 @@ func (s *authService) Register(ctx context.Context, params domain.RegisterParams
 	return user, nil
 }
 
-// Login authenticates a user by email and password, returning a JWT token pair.
-func (s *authService) Login(ctx context.Context, email, password string) (*domain.TokenPair, error) {
+// Login authenticates a user by email and password, returning the user and a JWT token pair.
+func (s *authService) Login(ctx context.Context, email, password string) (*domain.User, *domain.TokenPair, error) {
 	user, err := s.userRepo.GetByEmail(ctx, email)
 	if err != nil {
-		return nil, ErrInvalidCredentials
+		return nil, nil, ErrInvalidCredentials
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return nil, ErrInvalidCredentials
+		return nil, nil, ErrInvalidCredentials
 	}
 
-	return s.jwtManager.Generate(user)
-}
+	tokens, err := s.jwtManager.Generate(user)
+	if err != nil {
+		return nil, nil, err
+	}
 
+	return user, tokens, nil
+}
 // ValidateToken verifies an access token and returns its decoded claims.
 func (s *authService) ValidateToken(ctx context.Context, token string) (*domain.Claims, error) {
 	return s.jwtManager.ValidateAccessToken(token)

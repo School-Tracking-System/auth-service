@@ -1,0 +1,77 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-auth"
+    args:
+      [
+        "build",
+        "-t",
+        "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/auth-service:$SHORT_SHA",
+        "-t",
+        "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/auth-service:latest",
+        "-f",
+        "services/auth/Dockerfile",
+        "--platform=linux/amd64",
+        ".",
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-auth-sha"
+    args:
+      [
+        "push",
+        "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/auth-service:$SHORT_SHA",
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-auth-latest"
+    args:
+      [
+        "push",
+        "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/auth-service:latest",
+      ]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "get-gke-credentials"
+    args:
+      [
+        "container",
+        "clusters",
+        "get-credentials",
+        "${_GKE_CLUSTER}",
+        "--region",
+        "${_GKE_REGION}",
+        "--project",
+        "$PROJECT_ID",
+      ]
+
+  - name: "gcr.io/cloud-builders/kubectl"
+    id: "set-auth-image"
+    env:
+      - "CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}"
+      - "CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}"
+    args:
+      [
+        "set",
+        "image",
+        "deployment/auth-service",
+        "auth-service=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/auth-service:$SHORT_SHA",
+        "-n",
+        "${_K8S_NAMESPACE}",
+      ]
+
+  - name: "gcr.io/cloud-builders/kubectl"
+    id: "rollout-auth"
+    env:
+      - "CLOUDSDK_COMPUTE_REGION=${_GKE_REGION}"
+      - "CLOUDSDK_CONTAINER_CLUSTER=${_GKE_CLUSTER}"
+    args: ["rollout", "status", "deployment/auth-service", "-n", "${_K8S_NAMESPACE}"]
+
+substitutions:
+  _REGION: "us-east4"
+  _AR_REPOSITORY: "image-register"
+  _GKE_REGION: "us-east4"
+  _GKE_CLUSTER: "CHANGE_ME_CLUSTER_NAME"
+  _K8S_NAMESPACE: "school-tracking"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

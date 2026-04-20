@@ -72,12 +72,12 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 
 // Login godoc
 // @Summary Login user
-// @Description Authenticate user and return JWT tokens
+// @Description Authenticate user and return JWT tokens and user info
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body dtos.LoginRequest true "Login Request"
-// @Success 200 {object} dtos.TokenResponse
+// @Success 200 {object} dtos.AuthResponse
 // @Failure 400 {object} apierrors.Error
 // @Failure 401 {object} apierrors.Error
 // @Router /auth/login [post]
@@ -89,7 +89,7 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokens, err := c.authService.Login(r.Context(), req.Email, req.Password)
+	user, tokens, err := c.authService.Login(r.Context(), req.Email, req.Password)
 	if err != nil {
 		apiErr := apierrors.MapToAPIError(err)
 		render.Status(r, apiErr.Code)
@@ -97,15 +97,25 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := dtos.TokenResponse{
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
+	res := dtos.AuthResponse{
+		User: dtos.UserResponse{
+			ID:        user.ID.String(),
+			Email:     user.Email,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Phone:     user.Phone,
+			Role:      string(user.Role),
+			IsActive:  user.IsActive,
+		},
+		Tokens: dtos.TokenResponse{
+			AccessToken:  tokens.AccessToken,
+			RefreshToken: tokens.RefreshToken,
+		},
 	}
 
 	render.Status(r, http.StatusOK)
 	render.JSON(w, r, res)
 }
-
 // RefreshToken godoc
 // @Summary Refresh JWT Token
 // @Description Use refresh token to get a new access token
