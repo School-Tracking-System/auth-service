@@ -156,15 +156,17 @@ func TestLogin(t *testing.T) {
 			svc, repo, jwt := newTestService(t)
 			tc.setup(repo, jwt)
 
-			tokens, err := svc.Login(context.Background(), tc.email, tc.password)
+			user, tokens, err := svc.Login(context.Background(), tc.email, tc.password)
 
 			if tc.wantErr != nil {
 				assert.Error(t, err)
 				assert.ErrorIs(t, err, tc.wantErr)
 				assert.Nil(t, tokens)
+				assert.Nil(t, user)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, expectedTokens, tokens)
+				assert.Equal(t, existingUser, user)
 			}
 
 			repo.AssertExpectations(t)

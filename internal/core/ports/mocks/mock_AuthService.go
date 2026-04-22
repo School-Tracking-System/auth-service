@@ -23,33 +23,42 @@ func (_m *MockAuthService) EXPECT() *MockAuthService_Expecter {
 }
 
 // Login provides a mock function with given fields: ctx, email, password
-func (_m *MockAuthService) Login(ctx context.Context, email string, password string) (*domain.TokenPair, error) {
+func (_m *MockAuthService) Login(ctx context.Context, email string, password string) (*domain.User, *domain.TokenPair, error) {
 	ret := _m.Called(ctx, email, password)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
 	}
 
-	var r0 *domain.TokenPair
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*domain.TokenPair, error)); ok {
+	var r0 *domain.User
+	var r1 *domain.TokenPair
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*domain.User, *domain.TokenPair, error)); ok {
 		return rf(ctx, email, password)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) *domain.TokenPair); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *domain.User); ok {
 		r0 = rf(ctx, email, password)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*domain.TokenPair)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) *domain.TokenPair); ok {
 		r1 = rf(ctx, email, password)
 	} else {
-		r1 = ret.Error(1)
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*domain.TokenPair)
+		}
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, string, string) error); ok {
+		r2 = rf(ctx, email, password)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // MockAuthService_Login_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Login'
@@ -72,12 +81,12 @@ func (_c *MockAuthService_Login_Call) Run(run func(ctx context.Context, email st
 	return _c
 }
 
-func (_c *MockAuthService_Login_Call) Return(_a0 *domain.TokenPair, _a1 error) *MockAuthService_Login_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockAuthService_Login_Call) Return(_a0 *domain.User, _a1 *domain.TokenPair, _a2 error) *MockAuthService_Login_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *MockAuthService_Login_Call) RunAndReturn(run func(context.Context, string, string) (*domain.TokenPair, error)) *MockAuthService_Login_Call {
+func (_c *MockAuthService_Login_Call) RunAndReturn(run func(context.Context, string, string) (*domain.User, *domain.TokenPair, error)) *MockAuthService_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }

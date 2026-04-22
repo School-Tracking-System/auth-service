@@ -164,6 +164,15 @@ func TestLoginHandler(t *testing.T) {
 		RefreshToken: "refresh-token",
 	}
 
+	testUser := &domain.User{
+		ID:        uuid.New(),
+		Email:     "test@school.com",
+		FirstName: "Fernando",
+		LastName:  "Garcia",
+		Role:      domain.RoleAdmin,
+		IsActive:  true,
+	}
+
 	tests := []struct {
 		name       string
 		body       interface{}
@@ -175,7 +184,7 @@ func TestLoginHandler(t *testing.T) {
 			body: dtos.LoginRequest{Email: "test@school.com", Password: "SecurePass123!"},
 			setup: func(svc *mocks.MockAuthService) {
 				svc.EXPECT().Login(mock.Anything, "test@school.com", "SecurePass123!").
-					Return(expectedTokens, nil)
+					Return(testUser, expectedTokens, nil)
 			},
 			wantStatus: http.StatusOK,
 		},
@@ -184,7 +193,7 @@ func TestLoginHandler(t *testing.T) {
 			body: dtos.LoginRequest{Email: "test@school.com", Password: "wrong"},
 			setup: func(svc *mocks.MockAuthService) {
 				svc.EXPECT().Login(mock.Anything, "test@school.com", "wrong").
-					Return(nil, auth.ErrInvalidCredentials)
+					Return(nil, nil, auth.ErrInvalidCredentials)
 			},
 			wantStatus: http.StatusUnauthorized,
 		},
@@ -224,11 +233,12 @@ func TestLoginHandler(t *testing.T) {
 			assert.Equal(t, tc.wantStatus, rec.Code)
 
 			if tc.wantStatus == http.StatusOK {
-				var res dtos.TokenResponse
+				var res dtos.AuthResponse
 				err := json.NewDecoder(rec.Body).Decode(&res)
 				require.NoError(t, err)
-				assert.Equal(t, expectedTokens.AccessToken, res.AccessToken)
-				assert.Equal(t, expectedTokens.RefreshToken, res.RefreshToken)
+				assert.Equal(t, testUser.Email, res.User.Email)
+				assert.Equal(t, expectedTokens.AccessToken, res.Tokens.AccessToken)
+				assert.Equal(t, expectedTokens.RefreshToken, res.Tokens.RefreshToken)
 			}
 
 			svc.AssertExpectations(t)

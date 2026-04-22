@@ -37,7 +37,8 @@ type AuthResponse struct {
 	Tokens TokenResponse `json:"tokens"`
 }
 
-// UserResponse represents the public user data returned in API responses.type UserResponse struct {
+// UserResponse represents the public user data returned in API responses.
+type UserResponse struct {
 	ID        string  `json:"id"`
 	Email     string  `json:"email"`
 	FirstName string  `json:"first_name"`
