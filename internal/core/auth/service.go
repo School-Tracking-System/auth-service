@@ -105,3 +105,8 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*d
 
 	return s.jwtManager.Generate(user)
 }
+
+// ListUsers retrieves a list of users filtered by role.
+func (s *authService) ListUsers(ctx context.Context, role string) ([]*domain.User, error) {
+	return s.userRepo.List(ctx, role)
+}

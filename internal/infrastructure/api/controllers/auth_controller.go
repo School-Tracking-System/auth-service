@@ -151,3 +151,41 @@ func (c *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 	render.JSON(w, r, res)
 }
+
+// ListUsers godoc
+// @Summary List users
+// @Description Get a list of users filtered by role
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param role query string false "Role to filter by"
+// @Success 200 {array} dtos.UserResponse
+// @Failure 500 {object} apierrors.Error
+// @Router /auth/users [get]
+func (c *AuthController) ListUsers(w http.ResponseWriter, r *http.Request) {
+	role := r.URL.Query().Get("role")
+
+	users, err := c.authService.ListUsers(r.Context(), role)
+	if err != nil {
+		apiErr := apierrors.MapToAPIError(err)
+		render.Status(r, apiErr.Code)
+		render.JSON(w, r, apiErr)
+		return
+	}
+
+	res := make([]dtos.UserResponse, len(users))
+	for i, user := range users {
+		res[i] = dtos.UserResponse{
+			ID:        user.ID.String(),
+			Email:     user.Email,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Phone:     user.Phone,
+			Role:      string(user.Role),
+			IsActive:  user.IsActive,
+		}
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, res)
+}

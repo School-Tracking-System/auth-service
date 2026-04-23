@@ -51,3 +51,13 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.
 func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
 	return r.db.WithContext(ctx).Save(user).Error
 }
+
+func (r *userRepository) List(ctx context.Context, role string) ([]*domain.User, error) {
+	var users []*domain.User
+	query := r.db.WithContext(ctx)
+	if role != "" {
+		query = query.Where("role = ?", role)
+	}
+	err := query.Find(&users).Error
+	return users, err
+}

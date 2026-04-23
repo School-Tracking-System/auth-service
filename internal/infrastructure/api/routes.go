@@ -33,6 +33,7 @@ func NewRouter(authCtrl *controllers.AuthController) *chi.Mux {
 		r.Post("/register", authCtrl.Register)
 		r.Post("/login", authCtrl.Login)
 		r.Post("/refresh", authCtrl.RefreshToken)
+		r.Get("/users", authCtrl.ListUsers)
 	})
 
 	return r
