@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 RUN apk add --no-cache git
 
@@ -10,7 +10,7 @@ COPY proto/ ./proto/
 COPY services/auth/ ./services/auth/
 
 # Create a service-specific go.work to avoid loading other services
-RUN printf "go 1.24.0\n\nuse (\n\t./proto\n\t./services/auth\n)\n" > go.work
+RUN printf "go 1.25.0\n\nuse (\n\t./proto\n\t./services/auth\n)\n" > go.work
 
 # Build the application
 WORKDIR /app/services/auth

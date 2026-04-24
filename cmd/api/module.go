@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/fercho/school-tracking/services/auth/internal/core/auth"
 	"github.com/fercho/school-tracking/services/auth/internal/infrastructure/api"
@@ -29,7 +30,14 @@ func AppModule() fx.Option {
 		// Provide DB connection temporarily directly until a central DB pkg is made
 		fx.Provide(
 			func(cfg *env.Config, l *zap.Logger) (*gorm.DB, error) {
-				db, err := gorm.Open(gormpostgres.Open(cfg.DatabaseURL), &gorm.Config{})
+				preferSimple := false
+				if strings.Contains(cfg.DatabaseURL, "-pooler") {
+					preferSimple = true
+				}
+				db, err := gorm.Open(gormpostgres.New(gormpostgres.Config{
+					DSN:                  cfg.DatabaseURL,
+					PreferSimpleProtocol: preferSimple,
+				}), &gorm.Config{})
 				if err != nil {
 					l.Error("Failed to connect to database", zap.Error(err))
 					return nil, err

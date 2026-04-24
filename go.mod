@@ -1,6 +1,6 @@
 module github.com/fercho/school-tracking/services/auth
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/caarlos0/env/v10 v10.0.0
